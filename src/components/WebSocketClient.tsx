@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from 'react';
 
+import { webSocketEndpoint } from '../utils/environment';
 import type { WebSocketClientProps } from '../utils/types';
 
 export default function WebSocketClient({
@@ -9,7 +11,6 @@ export default function WebSocketClient({
 }: WebSocketClientProps) {
   const [ws, setWs] = useState<WebSocket | null>(null);
   const [messages, setMessages] = useState<any[]>([]);
-  const webSocketEndpoint = import.meta.env.VITE_WEBSOCKET_ENDPOINT || '';
 
   useEffect(() => {
     console.log('webSocketEndpoint:', webSocketEndpoint);
@@ -49,9 +50,10 @@ export default function WebSocketClient({
   return (
     <div>
       <>
-        {messages.length > 0 && (
-          <p className="title">{messages[messages.length - 1].message}</p>
-        )}
+        {messages.length > 0 &&
+          messages[messages.length - 1].message !== 'Forbidden' && (
+            <p className="title">{messages[messages.length - 1].message}</p>
+          )}
       </>
       {connectionId ? (
         <p>🔗 {connectionId && 'Connected'}</p>

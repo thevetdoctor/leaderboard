@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { AES, enc } from 'crypto-js';
 
 const encryptionKey = import.meta.env.VITE_ENCRYPTION_KEY || '';

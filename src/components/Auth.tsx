@@ -78,15 +78,19 @@ const Auth = ({ connectionId }: AuthProps) => {
   const passwordRegex =
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
+  const scoreRegex = /^(0|[1-9][0-9]*)$/;
+
   const validate = (type = 'login') => {
     const newErrors: Record<string, string> = {};
-    if (!username) newErrors.username = 'Username is required';
+    if (type === 'login') {
+      if (!username) newErrors.username = 'Username is required';
 
-    if (!password) {
-      newErrors.password = 'Password is required';
-    } else if (!passwordRegex.test(password)) {
-      newErrors.password =
-        'Password must be at least 8 characters, include uppercase, lowercase, number, and special character';
+      if (!password) {
+        newErrors.password = 'Password is required';
+      } else if (!passwordRegex.test(password)) {
+        newErrors.password =
+          'Password must be at least 8 characters, include uppercase, lowercase, number, and special character';
+      }
     }
 
     if (type === 'signup') {
@@ -100,6 +104,15 @@ const Auth = ({ connectionId }: AuthProps) => {
         newErrors.preferred_username = 'Preferred username is required';
 
       if (!name) newErrors.name = 'Name is required';
+
+      if (!username) newErrors.username = 'Username is required';
+
+      if (!password) {
+        newErrors.password = 'Password is required';
+      } else if (!passwordRegex.test(password)) {
+        newErrors.password =
+          'Password must be at least 8 characters, include uppercase, lowercase, number, and special character';
+      }
     }
 
     if (type === 'confirm') {
@@ -111,6 +124,8 @@ const Auth = ({ connectionId }: AuthProps) => {
     if (type === 'submit') {
       if (!score) {
         newErrors.score = 'Score is required';
+      } else if (!scoreRegex.test(score)) {
+        newErrors.score = 'Score must be a positive integer';
       }
     }
 
@@ -210,7 +225,8 @@ const Auth = ({ connectionId }: AuthProps) => {
         },
       );
       const userData = decrypt(login.data.data.user);
-      console.log(userData);
+      console.log('encrypted', login.data.data.user && 'valid');
+      console.log('decrypted', userData && 'valid');
       localStorage.setItem('user_id', JSON.stringify(login.data.data.user_id));
       localStorage.setItem(
         'username',
@@ -316,6 +332,7 @@ const Auth = ({ connectionId }: AuthProps) => {
   const fetched = useRef(false);
   async function fetchScores(page: number) {
     try {
+      setErrors({});
       console.log('Fetching scores for page:', page);
       setLoading(true);
       const lastKey = lastKeys[page - 1];
@@ -335,8 +352,13 @@ const Auth = ({ connectionId }: AuthProps) => {
         ...prev,
         [page]: res.data.lastKey ?? '',
       }));
+      console.log('lastKeys', lastKeys);
     } catch (err: any) {
       setLoading(false);
+      setErrors((prev) => ({
+        ...prev,
+        fetchScoresError: err.message,
+      }));
       console.error(err.message);
     } finally {
       setLoading(false);
@@ -345,7 +367,9 @@ const Auth = ({ connectionId }: AuthProps) => {
 
   async function fetchHighestScore() {
     try {
+      setErrors({});
       setHighestLoading(true);
+      console.log('Fetching highest score');
       const res: AxiosResponse<LeaderboardResponse> = await axiosInstance.get(
         `/leaderboard/top`,
         {
@@ -359,6 +383,10 @@ const Auth = ({ connectionId }: AuthProps) => {
       setTotalCount(res.data.count);
     } catch (err: any) {
       console.error('Error fetching highest score:', err.message);
+      setErrors((prev) => ({
+        ...prev,
+        fetchHighestScoreError: err.message,
+      }));
       setHighestLoading(false);
     } finally {
       setHighestLoading(false);
@@ -590,6 +618,7 @@ const Auth = ({ connectionId }: AuthProps) => {
         <div className="container">
           {loggedIn && (
             <button
+              className="submit"
               onClick={() => {
                 // setSubmitScore(true);
                 setStep('submit');
@@ -605,12 +634,13 @@ const Auth = ({ connectionId }: AuthProps) => {
               onClick={() => setShowHighest((prev) => !prev)}
               disabled={loading || highestLoading}
             >
-              {showHighest ? 'Show All Scores' : 'Show Highest Score'}
+              {showHighest ? 'All Scores' : 'Highest Score'}
             </button>
           )}
 
           {loggedIn && (
             <button
+              className="signout"
               onClick={() => {
                 localStorage.removeItem('user_id');
                 setLoggedIn(false);
@@ -710,6 +740,12 @@ const Auth = ({ connectionId }: AuthProps) => {
                 Last ⏭
               </button>
             </div>
+          )}
+          {errors.fetchScoresError && (
+            <div className="error">{errors.fetchScoresError}</div>
+          )}
+          {errors.fetchHighestScoreError && (
+            <div className="error">{errors.fetchHighestScoreError}</div>
           )}
         </div>
       )}

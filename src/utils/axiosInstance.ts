@@ -1,6 +1,7 @@
 import axios, { AxiosError } from 'axios';
 
-const baseUrl = import.meta.env.VITE_BASEURL || 'http://localhost:3005';
+const baseUrl =
+  import.meta.env.VITE_BASEURL || 'https://nebulaapp.timeguard.ng/';
 console.log('baseurl:', baseUrl);
 const axiosInstance = axios.create({
   baseURL: baseUrl,
