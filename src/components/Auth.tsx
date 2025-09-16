@@ -731,11 +731,11 @@ const Auth = ({ connectionId }: AuthProps) => {
               <button
                 className="page-btn last"
                 onClick={() => {
-                  if (lastKeys[totalPages]) {
+                  if (lastKeys[totalPages - 1]) {
                     setPage(totalPages);
                   }
                 }}
-                disabled={page === totalPages || !lastKeys[totalPages]}
+                disabled={page === totalPages || !lastKeys[totalPages - 1]}
               >
                 Last ⏭
               </button>
