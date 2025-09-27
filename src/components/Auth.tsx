@@ -5,14 +5,16 @@ import { useEffect, useRef, useState } from 'react';
 import { type AxiosResponse } from 'axios';
 
 import axiosInstance from '../utils/axiosInstance';
+import { validate } from '../utils/util.function';
 import {
   type AuthProps,
   type LeaderboardItem,
   type LeaderboardResponse,
   type LoginResponse,
   type Step,
+  type Values,
   decrypt,
-} from '../utils/types';
+} from '../utils/util.type';
 import './Auth.css';
 import ErrorMessage from './Error';
 import './Popup.css';
@@ -21,13 +23,24 @@ const Auth = ({ connectionId }: AuthProps) => {
   const [loggedIn, setLoggedIn] = useState(
     () => !!localStorage.getItem('user_id'),
   );
-  const [touched, setTouched] = useState<any>({});
-  const [email, setEmail] = useState<string>('');
-  const [username, setUsername] = useState<string>('');
-  const [preferred_username, setPreferredUsername] = useState<string>('');
-  const [name, setName] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const [confirmationCode, setConfirmationCode] = useState<string>('');
+
+  const [values, setValues] = useState<Values>({
+    email: '',
+    username: '',
+    password: '',
+    name: '',
+    preferred_username: '',
+    confirmationCode: '',
+    score: '',
+  });
+
+  const [touched, setTouched] = useState<
+    Partial<Record<keyof Values, boolean>>
+  >({});
+  const [errors, setErrors] = useState<Partial<Record<keyof Values, string>>>(
+    {},
+  );
+
   const [step, setStep] = useState<Step>(loggedIn ? 'home' : 'signup');
 
   const [scores, setScores] = useState<LeaderboardItem[]>([]);
@@ -37,7 +50,6 @@ const Auth = ({ connectionId }: AuthProps) => {
   const [signupLoading, setSignupLoading] = useState<boolean>(false);
   const [confirmLoading, setConfirmLoading] = useState<boolean>(false);
   const [loginLoading, setLoginLoading] = useState<boolean>(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
   const [signupSuccess, setSignupSuccess] = useState<boolean>(false);
   const [confirmSuccess, setConfirmSuccess] = useState<boolean>(false);
   const [deleteSuccess, setDeleteSuccess] = useState<boolean>(false);
@@ -50,7 +62,6 @@ const Auth = ({ connectionId }: AuthProps) => {
   const totalPages = Math.ceil(totalCount / 10);
   const [lastKeys, setLastKeys] = useState<Record<number, string>>({});
 
-  const [score, setScore] = useState<string>('');
   const [deleteScore, setDeleteScore] = useState<boolean>(false);
   const [deleteItem, setDeleteItem] = useState<{
     score: number;
@@ -59,8 +70,16 @@ const Auth = ({ connectionId }: AuthProps) => {
   }>();
   const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
   const [submitLoading, setSubmitLoading] = useState<boolean>(false);
-  // const [submitScore, setSubmitScore] = useState(false);
-  // const [submitSuccess, setSubmitSuccess] = useState(false);
+
+  const {
+    email,
+    username,
+    preferred_username,
+    name,
+    password,
+    confirmationCode,
+    score,
+  } = values;
 
   const handlePrevPage = () => {
     if (page > 1) {
@@ -76,90 +95,32 @@ const Auth = ({ connectionId }: AuthProps) => {
     }
   };
 
-  const passwordRegex =
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-
-  const scoreRegex = /^(0|[1-9][0-9]*)$/;
-
-  const validate = (type: string, field?: string) => {
-    const newErrors: Record<string, string> = {};
-    console.log('before:', newErrors);
-    const isEmpty = (value?: string) => !value || !value.trim();
-
-    // reset only the field being validated (so old error messages disappear if fixed)
-    if (field) delete newErrors[field];
-
-    if (type === 'login') {
-      if ((!field || field === 'username') && isEmpty(username))
-        newErrors.username = 'Username is required';
-
-      if ((!field || field === 'password') && isEmpty(password)) {
-        newErrors.password = 'Password is required';
-      } else if (
-        (!field || field === 'password') &&
-        !passwordRegex.test(password)
-      ) {
-        newErrors.password =
-          'Password must be at least 8 characters, include uppercase, lowercase, number, and special character';
-      }
-    }
-
-    if (type === 'signup') {
-      if ((!field || field === 'email') && isEmpty(email)) {
-        newErrors.email = 'Email is required';
-      } else if ((!field || field === 'email') && !/\S+@\S+\.\S+/.test(email)) {
-        newErrors.email = 'Enter a valid email';
-      }
-
-      if (
-        (!field || field === 'preferred_username') &&
-        isEmpty(preferred_username)
-      )
-        newErrors.preferred_username = 'Preferred username is required';
-
-      if ((!field || field === 'name') && isEmpty(name))
-        newErrors.name = 'Name is required';
-
-      if ((!field || field === 'username') && isEmpty(username))
-        newErrors.username = 'Username is required';
-
-      if ((!field || field === 'password') && isEmpty(password)) {
-        newErrors.password = 'Password is required';
-      } else if (
-        (!field || field === 'password') &&
-        !passwordRegex.test(password)
-      ) {
-        newErrors.password =
-          'Password must be at least 8 characters, include uppercase, lowercase, number, and special character';
-      }
-    }
-
-    if (type === 'confirm') {
-      if (
-        (!field || field === 'confirmationCode') &&
-        isEmpty(confirmationCode)
-      ) {
-        newErrors.confirmationCode = 'Confirmation code is required';
-      }
-    }
-
-    if (type === 'submit') {
-      if ((!field || field === 'score') && isEmpty(score)) {
-        newErrors.score = 'Score is required';
-      } else if ((!field || field === 'score') && !scoreRegex.test(score)) {
-        newErrors.score = 'Score must be a positive integer';
-      }
-    }
-
+  const handleChange = (step: Step, field: keyof Values, value: string) => {
+    setValues((prev) => ({ ...prev, [field]: value }));
+    setTouched((prev) => ({ ...prev, [field]: true }));
+    console.log('handleChange', step, field, value);
+    const newErrors = validate(
+      step,
+      { ...values, [field]: value },
+      field,
+      value,
+    );
     setErrors(newErrors);
-    console.log('after', newErrors);
-    return Object.keys(newErrors).length === 0;
   };
 
   const handleSignup = async () => {
     try {
       setErrors({});
-      if (!validate('signup')) return;
+      console.log('signing up');
+      const newErrors = validate('signup', values);
+      // mark all fields as touched
+      setTouched(
+        Object.keys(values).reduce((acc, key) => ({ ...acc, [key]: true }), {}),
+      );
+      if (Object.keys(newErrors).length > 0) {
+        setErrors(newErrors);
+        return;
+      }
       setSignupLoading(true);
       await axiosInstance.post(
         `/auth/register`,
@@ -196,7 +157,15 @@ const Auth = ({ connectionId }: AuthProps) => {
     try {
       setErrors({});
       console.log('confirming code');
-      if (!validate('confirm')) return;
+      const newErrors = validate('confirm', values);
+      // mark all fields as touched
+      setTouched(
+        Object.keys(values).reduce((acc, key) => ({ ...acc, [key]: true }), {}),
+      );
+      if (Object.keys(newErrors).length > 0) {
+        setErrors(newErrors);
+        return;
+      }
       setConfirmLoading(true);
       await axiosInstance.post(
         `/auth/confirm`,
@@ -231,7 +200,15 @@ const Auth = ({ connectionId }: AuthProps) => {
     try {
       setErrors({});
       console.log('logging in');
-      if (!validate('login')) return;
+      const newErrors = validate('login', values);
+      // mark all fields as touched
+      setTouched(
+        Object.keys(values).reduce((acc, key) => ({ ...acc, [key]: true }), {}),
+      );
+      if (Object.keys(newErrors).length > 0) {
+        setErrors(newErrors);
+        return;
+      }
       setLoginLoading(true);
       const login: AxiosResponse<LoginResponse> = await axiosInstance.post(
         `/auth/login`,
@@ -277,7 +254,15 @@ const Auth = ({ connectionId }: AuthProps) => {
     try {
       setErrors({});
       console.log('submitting scores');
-      if (!validate('submit')) return;
+      const newErrors = validate('submit', values);
+      // mark all fields as touched
+      setTouched(
+        Object.keys(values).reduce((acc, key) => ({ ...acc, [key]: true }), {}),
+      );
+      if (Object.keys(newErrors).length > 0) {
+        setErrors(newErrors);
+        return;
+      }
       setSubmitLoading(true);
       const userId = localStorage.getItem('user_id');
       const usernameStored = localStorage.getItem('username');
@@ -285,7 +270,7 @@ const Auth = ({ connectionId }: AuthProps) => {
       await axiosInstance.post(
         `/leaderboard/score`,
         {
-          score: parseInt(score, 10),
+          score: parseInt(score ?? '0', 10),
           user_name: usernameStored ? JSON.parse(usernameStored) : '',
           user_id: userId ? JSON.parse(userId) : '',
         },
@@ -296,7 +281,7 @@ const Auth = ({ connectionId }: AuthProps) => {
           },
         },
       );
-      setScore('');
+      // setScore('');
       setStep('home');
       fetchScores(page);
     } catch (err: any) {
@@ -441,15 +426,8 @@ const Auth = ({ connectionId }: AuthProps) => {
               type="email"
               placeholder="Email"
               value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-                setTouched({ ...touched, email: true });
-                validate('signup', 'email');
-              }}
-              onBlur={() => {
-                setTouched({ ...touched, email: true });
-                validate('signup', 'email');
-              }}
+              onChange={(e) => handleChange('signup', 'email', e.target.value)}
+              onBlur={(e) => handleChange('signup', 'email', e.target.value)}
               className={touched.email && errors.email ? 'error-input' : ''}
             />
             <ErrorMessage
@@ -464,15 +442,10 @@ const Auth = ({ connectionId }: AuthProps) => {
               type="text"
               placeholder="Username"
               value={username}
-              onChange={(e) => {
-                setUsername(e.target.value);
-                setTouched({ ...touched, username: true });
-                validate('signup', 'username');
-              }}
-              onBlur={() => {
-                setTouched({ ...touched, username: true });
-                validate('signup', 'username');
-              }}
+              onChange={(e) =>
+                handleChange('signup', 'username', e.target.value)
+              }
+              onBlur={(e) => handleChange('signup', 'username', e.target.value)}
               className={
                 touched.username && errors.username ? 'error-input' : ''
               }
@@ -489,15 +462,12 @@ const Auth = ({ connectionId }: AuthProps) => {
               type="text"
               placeholder="Preferred Username"
               value={preferred_username}
-              onChange={(e) => {
-                setPreferredUsername(e.target.value);
-                setTouched({ ...touched, preferred_username: true });
-                validate('signup', 'preferred_username');
-              }}
-              onBlur={() => {
-                setTouched({ ...touched, preferred_username: true });
-                validate('signup', 'preferred_username');
-              }}
+              onChange={(e) =>
+                handleChange('signup', 'preferred_username', e.target.value)
+              }
+              onBlur={(e) =>
+                handleChange('signup', 'preferred_username', e.target.value)
+              }
               className={
                 touched.preferred_username && errors.preferred_username
                   ? 'error-input'
@@ -516,15 +486,8 @@ const Auth = ({ connectionId }: AuthProps) => {
               type="text"
               placeholder="Name"
               value={name}
-              onChange={(e) => {
-                setName(e.target.value);
-                setTouched({ ...touched, name: true });
-                validate('signup', 'name');
-              }}
-              onBlur={() => {
-                setTouched({ ...touched, name: true });
-                validate('signup', 'name');
-              }}
+              onChange={(e) => handleChange('signup', 'name', e.target.value)}
+              onBlur={(e) => handleChange('signup', 'name', e.target.value)}
               className={touched.name && errors.name ? 'error-input' : ''}
             />
             <ErrorMessage
@@ -539,15 +502,10 @@ const Auth = ({ connectionId }: AuthProps) => {
               type="password"
               placeholder="Password"
               value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-                setTouched({ ...touched, password: true });
-                validate('signup', 'password');
-              }}
-              onBlur={() => {
-                setTouched({ ...touched, password: true });
-                validate('signup', 'password');
-              }}
+              onChange={(e) =>
+                handleChange('signup', 'password', e.target.value)
+              }
+              onBlur={(e) => handleChange('signup', 'password', e.target.value)}
               className={
                 touched.password && errors.password ? 'error-input' : ''
               }
@@ -601,18 +559,28 @@ const Auth = ({ connectionId }: AuthProps) => {
       {step === 'confirm' && (
         <div>
           <h2>Confirm Signup</h2>
-          <input
-            placeholder="Confirmation Code"
-            value={confirmationCode}
-            onChange={(e) => {
-              setConfirmationCode(e.target.value);
-              validate('signup', 'confirmationCode');
-            }}
-            onBlur={() => {
-              setTouched({ ...touched, confirmationCode: true });
-              validate('signup', 'confirmationCode');
-            }}
-          />
+          <div className="form-group">
+            <input
+              placeholder="Confirmation Code"
+              value={confirmationCode}
+              onChange={(e) =>
+                handleChange('confirm', 'confirmationCode', e.target.value)
+              }
+              onBlur={(e) =>
+                handleChange('confirm', 'confirmationCode', e.target.value)
+              }
+              className={
+                touched.confirmationCode && errors.confirmationCode
+                  ? 'error-input'
+                  : ''
+              }
+            />
+            <ErrorMessage
+              id="confirmation-code-error"
+              touched={touched.confirmationCode}
+              message={errors.confirmationCode}
+            />
+          </div>
           <div>
             {confirmLoading ? (
               <div className="spinner">
@@ -625,10 +593,6 @@ const Auth = ({ connectionId }: AuthProps) => {
               </>
             )}
           </div>
-          <ErrorMessage
-            id="confirmation-code-error"
-            message={errors.confirmationCode}
-          />
           <ErrorMessage id="confirm-error" message={errors.confirmError} />
         </div>
       )}
@@ -659,15 +623,10 @@ const Auth = ({ connectionId }: AuthProps) => {
               data-testid="username-input"
               placeholder="Username"
               value={username}
-              onChange={(e) => {
-                setUsername(e.target.value);
-                setTouched({ ...touched, username: true });
-                validate('login', 'username');
-              }}
-              onBlur={() => {
-                setTouched({ ...touched, username: true });
-                validate('login', 'username');
-              }}
+              onChange={(e) =>
+                handleChange('login', 'username', e.target.value)
+              }
+              onBlur={(e) => handleChange('login', 'username', e.target.value)}
               className={
                 touched.username && errors.username ? 'error-input' : ''
               }
@@ -684,15 +643,10 @@ const Auth = ({ connectionId }: AuthProps) => {
               placeholder="Password"
               type="password"
               value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-                setTouched({ ...touched, password: true });
-                validate('login', 'password');
-              }}
-              onBlur={() => {
-                setTouched({ ...touched, password: true });
-                validate('login', 'password');
-              }}
+              onChange={(e) =>
+                handleChange('login', 'password', e.target.value)
+              }
+              onBlur={(e) => handleChange('login', 'password', e.target.value)}
               className={
                 touched.password && errors.password ? 'error-input' : ''
               }
@@ -726,17 +680,15 @@ const Auth = ({ connectionId }: AuthProps) => {
               data-testid="score-input"
               placeholder="Score"
               value={score}
-              onChange={(e) => {
-                setScore(e.target.value);
-                validate('submit', 'score');
-              }}
-              onBlur={() => {
-                setTouched({ ...touched, score: true });
-                validate('submit', 'score');
-              }}
-              className={errors.score ? 'error-input' : ''}
+              onChange={(e) => handleChange('submit', 'score', e.target.value)}
+              onBlur={(e) => handleChange('submit', 'score', e.target.value)}
+              className={touched.score && errors.score ? 'error-input' : ''}
             />
-            <ErrorMessage id="score-error" message={errors.score} />
+            <ErrorMessage
+              id="score-error"
+              touched={touched.score}
+              message={errors.score}
+            />
           </div>
 
           {submitLoading ? (

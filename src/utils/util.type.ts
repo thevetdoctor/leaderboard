@@ -14,6 +14,23 @@ export type AuthProps = {
 
 export type Step = 'signup' | 'popup' | 'confirm' | 'login' | 'home' | 'submit';
 
+export type Values = {
+  email: string;
+  username: string;
+  password: string;
+  name: string;
+  preferred_username: string;
+  confirmationCode?: string;
+  score?: string;
+  signupError?: string;
+  loginError?: string;
+  submitError?: string;
+  confirmError?: string;
+  deleteError?: string;
+  fetchScoresError?: string;
+  fetchHighestScoreError?: string;
+};
+
 export type LeaderboardItem = { user_name: string; score: number; id?: string };
 
 export interface LeaderboardResponse {

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 
 import { webSocketEndpoint } from '../utils/environment';
-import type { WebSocketClientProps } from '../utils/types';
+import type { WebSocketClientProps } from '../utils/util.type';
 
 export default function WebSocketClient({
   onConnectionId,
