@@ -42,5 +42,5 @@ jobs:
       - name: Run Cypress tests (Electron)
         # env:
         #   NODE_OPTIONS: --import tsx
-        run: npx cypress run --browser chrome
+        run:  unset NODE_OPTIONS && npx cypress run --browser chrome
 
