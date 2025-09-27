@@ -11,6 +11,9 @@ on:
 jobs:
   cypress-run:
     runs-on: ubuntu-latest
+    container:
+      image: cypress/browsers:22.16.0
+      options: --user 1001
 
     steps:
       - name: Checkout code
