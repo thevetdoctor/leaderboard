@@ -1,6 +1,6 @@
 describe('Base test', () => {
   it('passes', () => {
-    cy.visit('http://localhost:5173');
+    cy.visit('/');
 
     cy.get('[data-testid="signup-header"]')
       .should('exist')
