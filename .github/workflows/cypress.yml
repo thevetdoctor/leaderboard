@@ -31,13 +31,15 @@ jobs:
         run: npm ci
 
       # 4️⃣ Start your dev server in the background
-      - name: Start app
-        run: npm run dev &
+      - name: Start app and wait
+        run: |
+          npm run dev &
+          npx wait-on http://localhost:5173
 
-      # 5️⃣ Wait for app to be ready
-      - name: Wait for app
-        run: sleep 30s
-        shell: bash
+      # # 5️⃣ Wait for app to be ready
+      # - name: Wait for app
+      #   run: sleep 30s
+      #   shell: bash
 
       # 6️⃣ Verify Cypress installation
       - name: Verify Cypress
