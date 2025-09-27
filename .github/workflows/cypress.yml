@@ -32,15 +32,9 @@ jobs:
         run: sleep 30s
         shell: bash
 
-    #   # Run Cypress
-    #   - name: Run Cypress tests
-    #     run: npm run cypress:run
-
       - name: Verify Cypress
         run: npx cypress verify
 
-      - name: Run Cypress tests (Electron)
-        # env:
-        #   NODE_OPTIONS: --import tsx
-        run:  unset NODE_OPTIONS && npx cypress run --browser chrome
+      - name: Run Cypress tests
+        run:  npx ts-node --transpile-only ./node_modules/.bin/cypress run --browser chrome
 
