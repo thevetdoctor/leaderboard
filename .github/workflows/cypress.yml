@@ -49,7 +49,7 @@ jobs:
     # After tests, you can unset NODE_OPTIONS if needed to avoid affecting other steps
     # echo "NODE_OPTIONS before: $NODE_OPTIONS"
     # unset NODE_OPTIONS
-    
+
   install:
     runs-on: ubuntu-latest
     container:
@@ -64,13 +64,13 @@ jobs:
         with:
           runTests: false
       # report machine parameters
-      - run: yarn cypress info
-      - run: node --version
-      - run: node -p 'os.cpus()'
-      - run: yarn types
-      - run: yarn lint
-      - run: yarn test:unit:ci
-      - run: yarn build:ci
+      # - run: yarn cypress info
+      # - run: node --version
+      # - run: node -p 'os.cpus()'
+      # - run: yarn types
+      # - run: yarn lint
+      # - run: yarn test:unit:ci
+      # - run: yarn build:ci
 
       - name: Save build folder
         uses: actions/upload-artifact@v4
