@@ -12,6 +12,8 @@ export type AuthProps = {
   connectionId: string | null;
 };
 
+export type Step = 'signup' | 'popup' | 'confirm' | 'login' | 'home' | 'submit';
+
 export type LeaderboardItem = { user_name: string; score: number; id?: string };
 
 export interface LeaderboardResponse {

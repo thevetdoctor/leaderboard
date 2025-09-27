@@ -10,54 +10,55 @@ import {
   type LeaderboardItem,
   type LeaderboardResponse,
   type LoginResponse,
+  type Step,
   decrypt,
 } from '../utils/types';
 import './Auth.css';
+import ErrorMessage from './Error';
 import './Popup.css';
 
 const Auth = ({ connectionId }: AuthProps) => {
   const [loggedIn, setLoggedIn] = useState(
     () => !!localStorage.getItem('user_id'),
   );
-  const [email, setEmail] = useState('');
-  const [username, setUsername] = useState('');
-  const [preferred_username, setPreferredUsername] = useState('');
-  const [name, setName] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmationCode, setConfirmationCode] = useState('');
-  const [step, setStep] = useState<
-    'signup' | 'popup' | 'confirm' | 'login' | 'home' | 'submit'
-  >(loggedIn ? 'home' : 'signup');
+  const [touched, setTouched] = useState<any>({});
+  const [email, setEmail] = useState<string>('');
+  const [username, setUsername] = useState<string>('');
+  const [preferred_username, setPreferredUsername] = useState<string>('');
+  const [name, setName] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [confirmationCode, setConfirmationCode] = useState<string>('');
+  const [step, setStep] = useState<Step>(loggedIn ? 'home' : 'signup');
 
   const [scores, setScores] = useState<LeaderboardItem[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
 
-  const [loading, setLoading] = useState(true);
-  const [signupLoading, setSignupLoading] = useState(false);
-  const [confirmLoading, setConfirmLoading] = useState(false);
-  const [loginLoading, setLoginLoading] = useState(false);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [signupLoading, setSignupLoading] = useState<boolean>(false);
+  const [confirmLoading, setConfirmLoading] = useState<boolean>(false);
+  const [loginLoading, setLoginLoading] = useState<boolean>(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [signupSuccess, setSignupSuccess] = useState(false);
-  const [confirmSuccess, setConfirmSuccess] = useState(false);
-  const [deleteSuccess, setDeleteSuccess] = useState(false);
+  const [signupSuccess, setSignupSuccess] = useState<boolean>(false);
+  const [confirmSuccess, setConfirmSuccess] = useState<boolean>(false);
+  const [deleteSuccess, setDeleteSuccess] = useState<boolean>(false);
 
-  const [showHighest, setShowHighest] = useState(false);
-  const [highestLoading, setHighestLoading] = useState(false);
+  const [showHighest, setShowHighest] = useState<boolean>(false);
+  const [highestLoading, setHighestLoading] = useState<boolean>(false);
   const [highestScore, setHighestScore] = useState<LeaderboardItem>();
 
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState<number>(1);
   const totalPages = Math.ceil(totalCount / 10);
   const [lastKeys, setLastKeys] = useState<Record<number, string>>({});
 
-  const [score, setScore] = useState('');
-  const [deleteScore, setDeleteScore] = useState(false);
+  const [score, setScore] = useState<string>('');
+  const [deleteScore, setDeleteScore] = useState<boolean>(false);
   const [deleteItem, setDeleteItem] = useState<{
     score: number;
     user_name: string;
     id?: string;
   }>();
-  const [deleteLoading, setDeleteLoading] = useState(false);
-  const [submitLoading, setSubmitLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
+  const [submitLoading, setSubmitLoading] = useState<boolean>(false);
   // const [submitScore, setSubmitScore] = useState(false);
   // const [submitSuccess, setSubmitSuccess] = useState(false);
 
@@ -80,12 +81,17 @@ const Auth = ({ connectionId }: AuthProps) => {
 
   const scoreRegex = /^(0|[1-9][0-9]*)$/;
 
-  const validate = (type = 'login') => {
+  const validate = (type: string, field?: string) => {
     const newErrors: Record<string, string> = {};
-    if (type === 'login') {
-      if (!username) newErrors.username = 'Username is required';
 
-      if (!password) {
+    // reset only the field being validated (so old error messages disappear if fixed)
+    if (field) delete newErrors[field];
+
+    if (type === 'login') {
+      if ((!field || field === 'username') && !username)
+        newErrors.username = 'Username is required';
+
+      if ((!field || field === 'password') && !password) {
         newErrors.password = 'Password is required';
       } else if (!passwordRegex.test(password)) {
         newErrors.password =
@@ -94,20 +100,22 @@ const Auth = ({ connectionId }: AuthProps) => {
     }
 
     if (type === 'signup') {
-      if (!email) {
+      if ((!field || field === 'email') && !email) {
         newErrors.email = 'Email is required';
       } else if (!/\S+@\S+\.\S+/.test(email)) {
         newErrors.email = 'Enter a valid email';
       }
 
-      if (!preferred_username)
+      if ((!field || field === 'preferred_username') && !preferred_username)
         newErrors.preferred_username = 'Preferred username is required';
 
-      if (!name) newErrors.name = 'Name is required';
+      if ((!field || field === 'name') && !name)
+        newErrors.name = 'Name is required';
 
-      if (!username) newErrors.username = 'Username is required';
+      if ((!field || field === 'username') && !username)
+        newErrors.username = 'Username is required';
 
-      if (!password) {
+      if ((!field || field === 'password') && !password) {
         newErrors.password = 'Password is required';
       } else if (!passwordRegex.test(password)) {
         newErrors.password =
@@ -116,13 +124,13 @@ const Auth = ({ connectionId }: AuthProps) => {
     }
 
     if (type === 'confirm') {
-      if (!confirmationCode) {
+      if ((!field || field === 'confirmationCode') && !confirmationCode) {
         newErrors.confirmationCode = 'Confirmation code is required';
       }
     }
 
     if (type === 'submit') {
-      if (!score) {
+      if ((!field || field === 'score') && !score) {
         newErrors.score = 'Score is required';
       } else if (!scoreRegex.test(score)) {
         newErrors.score = 'Score must be a positive integer';
@@ -209,7 +217,7 @@ const Auth = ({ connectionId }: AuthProps) => {
     try {
       setErrors({});
       console.log('logging in');
-      if (!validate()) return;
+      if (!validate('login')) return;
       setLoginLoading(true);
       const login: AxiosResponse<LoginResponse> = await axiosInstance.post(
         `/auth/login`,
@@ -412,58 +420,129 @@ const Auth = ({ connectionId }: AuthProps) => {
     <div>
       {step === 'signup' && (
         <div>
-          <h2>Signup</h2>
+          <h2 data-testid="signup-header">Signup</h2>
           <div className="form-group">
             <input
+              data-testid="email-input"
+              type="email"
               placeholder="Email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className={errors.email ? 'error-input' : ''}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setTouched({ ...touched, email: true });
+                validate('signup', 'email');
+              }}
+              onBlur={() => {
+                setTouched({ ...touched, email: true });
+                validate('signup', 'email');
+              }}
+              className={touched.email && errors.email ? 'error-input' : ''}
             />
-            {errors.email && <span className="error">{errors.email}</span>}
+            <ErrorMessage
+              id="email-error"
+              touched={touched.email}
+              message={errors.email}
+            />
           </div>
           <div className="form-group">
             <input
+              data-testid="username-input"
+              type="text"
               placeholder="Username"
               value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className={errors.username ? 'error-input' : ''}
+              onChange={(e) => {
+                setUsername(e.target.value);
+                setTouched({ ...touched, username: true });
+                validate('signup', 'username');
+              }}
+              onBlur={() => {
+                setTouched({ ...touched, username: true });
+                validate('signup', 'username');
+              }}
+              className={
+                touched.username && errors.username ? 'error-input' : ''
+              }
             />
-            {errors.username && (
-              <span className="error">{errors.username}</span>
-            )}
+            <ErrorMessage
+              id="username-error"
+              touched={touched.username}
+              message={errors.username}
+            />
           </div>
           <div className="form-group">
             <input
+              data-testid="preferred-username-input"
+              type="text"
               placeholder="Preferred Username"
               value={preferred_username}
-              onChange={(e) => setPreferredUsername(e.target.value)}
-              className={errors.preferred_username ? 'error-input' : ''}
+              onChange={(e) => {
+                setPreferredUsername(e.target.value);
+                setTouched({ ...touched, preferred_username: true });
+                validate('signup', 'preferred_username');
+              }}
+              onBlur={() => {
+                setTouched({ ...touched, preferred_username: true });
+                validate('signup', 'preferred_username');
+              }}
+              className={
+                touched.preferred_username && errors.preferred_username
+                  ? 'error-input'
+                  : ''
+              }
             />
-            {errors.preferred_username && (
-              <span className="error">{errors.preferred_username}</span>
-            )}
+            <ErrorMessage
+              id="preferred-username-error"
+              touched={touched.preferred_username}
+              message={errors.preferred_username}
+            />
           </div>
           <div className="form-group">
             <input
+              data-testid="name-input"
+              type="text"
               placeholder="Name"
               value={name}
-              onChange={(e) => setName(e.target.value)}
-              className={errors.name ? 'error-input' : ''}
+              onChange={(e) => {
+                setName(e.target.value);
+                setTouched({ ...touched, name: true });
+                validate('signup', 'name');
+              }}
+              onBlur={() => {
+                setTouched({ ...touched, name: true });
+                validate('signup', 'name');
+              }}
+              className={touched.name && errors.name ? 'error-input' : ''}
             />
-            {errors.name && <span className="error">{errors.name}</span>}
+            <ErrorMessage
+              id="name-error"
+              touched={touched.name}
+              message={errors.name}
+            />
           </div>
           <div className="form-group">
             <input
-              placeholder="Password"
+              data-testid="password-input"
               type="password"
+              placeholder="Password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className={errors.password ? 'error-input' : ''}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setTouched({ ...touched, password: true });
+                validate('signup', 'password');
+              }}
+              onBlur={() => {
+                setTouched({ ...touched, password: true });
+                validate('signup', 'password');
+              }}
+              className={
+                touched.password && errors.password ? 'error-input' : ''
+              }
             />
-            {errors.password && (
-              <span className="error">{errors.password}</span>
-            )}
+            <ErrorMessage
+              id="password-error"
+              touched={touched.password}
+              message={errors.password}
+            />
           </div>
           <div>
             {signupLoading ? (
@@ -472,14 +551,19 @@ const Auth = ({ connectionId }: AuthProps) => {
               </div>
             ) : (
               <>
-                <button onClick={handleSignup}>Sign Up</button>
-                <button onClick={showLogin}>Login</button>
+                <button
+                  data-testid="submit-signup-button"
+                  onClick={handleSignup}
+                >
+                  Sign Up
+                </button>
+                <button data-testid="submit-login-button" onClick={showLogin}>
+                  Login
+                </button>
               </>
             )}
           </div>
-          {errors.signupError && (
-            <div className="error">{errors.signupError}</div>
-          )}
+          <ErrorMessage id="signup-error" message={errors.signupError} />
         </div>
       )}
 
@@ -506,7 +590,14 @@ const Auth = ({ connectionId }: AuthProps) => {
           <input
             placeholder="Confirmation Code"
             value={confirmationCode}
-            onChange={(e) => setConfirmationCode(e.target.value)}
+            onChange={(e) => {
+              setConfirmationCode(e.target.value);
+              validate('signup', 'confirmationCode');
+            }}
+            onBlur={() => {
+              setTouched({ ...touched, confirmationCode: true });
+              validate('signup', 'confirmationCode');
+            }}
           />
           <div>
             {confirmLoading ? (
@@ -520,9 +611,11 @@ const Auth = ({ connectionId }: AuthProps) => {
               </>
             )}
           </div>
-          {errors.confirmError && (
-            <div className="error">{errors.confirmError}</div>
-          )}
+          <ErrorMessage
+            id="confirmation-code-error"
+            message={errors.confirmationCode}
+          />
+          <ErrorMessage id="confirm-error" message={errors.confirmError} />
         </div>
       )}
 
@@ -545,29 +638,42 @@ const Auth = ({ connectionId }: AuthProps) => {
 
       {step === 'login' && (
         <div>
-          <h2>Login</h2>
+          <h2 data-testid="login-header">Login</h2>
           <div className="form-group">
             <input
+              type="text"
+              data-testid="username-input"
               placeholder="Username"
               value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              onChange={(e) => {
+                setUsername(e.target.value);
+                validate('login', 'username');
+              }}
+              onBlur={() => {
+                setTouched({ ...touched, username: true });
+                validate('login', 'username');
+              }}
               className={errors.username ? 'error-input' : ''}
             />
-            {errors.username && (
-              <span className="error">{errors.username}</span>
-            )}
+            <ErrorMessage id="username-error" message={errors.username} />
           </div>
           <div className="form-group">
             <input
+              data-testid="password-input"
               placeholder="Password"
               type="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                validate('login', 'password');
+              }}
+              onBlur={() => {
+                setTouched({ ...touched, password: true });
+                validate('login', 'password');
+              }}
               className={errors.password ? 'error-input' : ''}
             />
-            {errors.password && (
-              <span className="error">{errors.password}</span>
-            )}
+            <ErrorMessage id="password-error" message={errors.password} />
           </div>
           {loginLoading ? (
             <div className="spinner">
@@ -579,23 +685,30 @@ const Auth = ({ connectionId }: AuthProps) => {
               <button onClick={showSignup}>Signup</button>
             </>
           )}
-          {errors.loginError && (
-            <div className="error">{errors.loginError}</div>
-          )}
+          <ErrorMessage id="login-error" message={errors.loginError} />
         </div>
       )}
 
       {step === 'submit' && (
         <div>
-          <h2>Submit Score</h2>
+          <h2 data-testid="submit-header">Submit Score</h2>
           <div className="form-group">
             <input
+              type="text"
+              data-testid="score-input"
               placeholder="Score"
               value={score}
-              onChange={(e) => setScore(e.target.value)}
+              onChange={(e) => {
+                setScore(e.target.value);
+                validate('submit', 'score');
+              }}
+              onBlur={() => {
+                setTouched({ ...touched, score: true });
+                validate('submit', 'score');
+              }}
               className={errors.score ? 'error-input' : ''}
             />
-            {errors.score && <span className="error">{errors.score}</span>}
+            <ErrorMessage id="score-error" message={errors.score} />
           </div>
 
           {submitLoading ? (
@@ -608,9 +721,7 @@ const Auth = ({ connectionId }: AuthProps) => {
               <button onClick={() => setStep('home')}>Cancel</button>
             </>
           )}
-          {errors.submitError && (
-            <div className="error">{errors.submitError}</div>
-          )}
+          <ErrorMessage id="submit-error" message={errors.submitError} />
         </div>
       )}
 
@@ -618,6 +729,7 @@ const Auth = ({ connectionId }: AuthProps) => {
         <div className="container">
           {loggedIn && (
             <button
+              data-testid="submit-score-btn"
               className="submit"
               onClick={() => {
                 // setSubmitScore(true);
@@ -640,6 +752,7 @@ const Auth = ({ connectionId }: AuthProps) => {
 
           {loggedIn && (
             <button
+              data-testid="signout-btn"
               className="signout"
               onClick={() => {
                 localStorage.removeItem('user_id');
@@ -651,13 +764,15 @@ const Auth = ({ connectionId }: AuthProps) => {
             </button>
           )}
 
-          <h2 className="title">🏆 Scoreboard</h2>
-          <h4>
+          <h2 data-testid="scoreboard-header" className="title">
+            🏆 Scoreboard
+          </h2>
+          <h4 data-testid="records-count" className="records">
             {!showHighest
               ? `Records : ${totalCount}`
               : `Highest Score: ${highestScore?.score || 0}`}
           </h4>
-          <div className="header">
+          <div data-testid="scoreboard-header" className="header">
             <span>Username</span>
             <span>Score</span>
           </div>
@@ -741,12 +856,15 @@ const Auth = ({ connectionId }: AuthProps) => {
               </button>
             </div>
           )}
-          {errors.fetchScoresError && (
-            <div className="error">{errors.fetchScoresError}</div>
-          )}
-          {errors.fetchHighestScoreError && (
-            <div className="error">{errors.fetchHighestScoreError}</div>
-          )}
+          <ErrorMessage
+            id="fetch-scores-error"
+            message={errors.fetchScoresError}
+          />
+          <ErrorMessage
+            id="fetch-highest-score-error"
+            message={errors.fetchHighestScoreError}
+          />
+          <ErrorMessage id="delete-error" message={errors.deleteError} />
         </div>
       )}
 
