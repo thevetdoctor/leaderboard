@@ -31,7 +31,7 @@ export const validate = (
     score,
   } = values;
   const newErrors: Record<string, string> = {};
-  console.log('before:', newErrors);
+  // console.log('before:', newErrors);
   const isEmpty = (value?: string) => !value || !value.trim();
 
   // reset only the field being validated (so old error messages disappear if fixed)
@@ -114,8 +114,6 @@ export const validate = (
     }
   }
 
-  //   setErrors(newErrors);
-  console.log('after', newErrors);
-  //   return Object.keys(newErrors).length === 0;
+  // console.log('after', newErrors);
   return newErrors;
 };

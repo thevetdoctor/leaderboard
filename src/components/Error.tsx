@@ -11,7 +11,7 @@ const ErrorMessageComponent: React.FC<ErrorMessageProps> = ({
   message,
   touched,
 }) => {
-  console.log('Rendering ErrorMessage:', { id, message, touched });
+  // console.log('Rendering ErrorMessage:', { id, message, touched });
 
   if (!touched || !message) return null;
 

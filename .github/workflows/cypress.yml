@@ -1,42 +1,47 @@
-# name: E2E Tests (Cypress)
+name: E2E Tests (Cypress)
 
-# on:
-#   push:
-#     branches:
-#       - main
-#   pull_request:
-#     branches:
-#       - main
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
-# jobs:
-#   cypress-run:
-#     runs-on: ubuntu-latest
+jobs:
+  cypress-run:
+    runs-on: ubuntu-latest
 
-#     steps:
-#       - name: Checkout code
-#         uses: actions/checkout@v4
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-#       - name: Setup Node.js
-#         uses: actions/setup-node@v4
-#         with:
-#           node-version: 18
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
 
-#       - name: Install dependencies
-#         run: npm install
+      - name: Install dependencies
+        run: npm install
 
-#       # Start your dev server
-#       - name: Start app
-#         run: npm run dev &
+      # Start your dev server
+      - name: Start app
+        run: npm run dev &
 
-#       - name: Wait for app to boot
-#         run: sleep 30s
-#         shell: bash
+      - name: Wait for app to boot
+        run: sleep 30s
+        shell: bash
 
-#       - name: Verify Cypress
-#         run: npx cypress verify
+      - name: Verify Cypress
+        run: npx cypress verify
 
-#       - name: Run Cypress tests
-#         run: |
-#           echo "NODE_OPTIONS before: $NODE_OPTIONS"
-#           unset NODE_OPTIONS
-#           npx cypress run --browser chrome
+      - name: Run Cypress tests
+        run: npm run cypress -- run --browser chrome
+        
+        # If you encounter memory issues, uncomment the following lines to adjust Node.js options
+        # echo "Setting NODE_OPTIONS to --max-old-space-size=4096"
+        # export NODE_OPTIONS=--max-old-space-size=4096
+        # echo "NODE_OPTIONS after: $NODE_OPTIONS"
+        # After tests, you can unset NODE_OPTIONS if needed to avoid affecting other steps
+        # echo "NODE_OPTIONS before: $NODE_OPTIONS"
+        # unset NODE_OPTIONS
