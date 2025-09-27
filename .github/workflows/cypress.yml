@@ -36,5 +36,5 @@ jobs:
         run: npx cypress verify
 
       - name: Run Cypress tests
-        run:  npx ts-node --transpile-only ./node_modules/.bin/cypress run --browser chrome
+        run:  npx cypress run --browser chrome
 
