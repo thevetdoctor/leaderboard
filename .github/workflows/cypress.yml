@@ -36,7 +36,11 @@ jobs:
         run: npx cypress verify
 
       - name: Run Cypress tests
-        run: npm run cypress:run -- --browser chrome
+        run: |
+          echo "NODE_OPTIONS before: $NODE_OPTIONS"
+          unset NODE_OPTIONS
+          npx cypress run --browser chrome
+        shell: bash
 
         # If you encounter memory issues, uncomment the following lines to adjust Node.js options
         # echo "Setting NODE_OPTIONS to --max-old-space-size=4096"
