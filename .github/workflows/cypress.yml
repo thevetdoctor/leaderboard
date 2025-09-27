@@ -27,13 +27,19 @@ jobs:
       # Start your dev server
       - name: Start app
         run: npm run dev &
-      
-      # Wait for server to be up
-      - name: Wait for app
-        uses: jakejarvis/wait-action@v0.2.0
-        with:
-          time: '20s'
 
-      # Run Cypress
-      - name: Run Cypress tests
-        run: npm run cypress:run
+      - name: Wait for app to boot
+        run: sleep 30s
+        shell: bash
+
+    #   # Run Cypress
+    #   - name: Run Cypress tests
+    #     run: npm run cypress:run
+
+      - name: Verify Cypress
+        run: npx cypress verify
+
+      - name: Run Cypress tests (Electron)
+        env:
+          NODE_OPTIONS: --import tsx
+        run: npx cypress run --browser electron
