@@ -78,24 +78,21 @@ describe('Form validation', () => {
   it('should show an error message for invalid signup fields', () => {
     cy.get('[data-testid="submit-signup-button"]').click();
 
-     cy.get('[data-testid="email-error"]')
+    cy.get('[data-testid="email-error"]')
       .should('exist')
       .and('have.text', 'Email is required');
-       cy.get('[data-testid="username-error"]')
+    cy.get('[data-testid="username-error"]')
       .should('exist')
       .and('have.text', 'Username is required');
-        cy.get('[data-testid="preferred-username-error"]')
+    cy.get('[data-testid="preferred-username-error"]')
       .should('exist')
       .and('have.text', 'Preferred username is required');
-       cy.get('[data-testid="name-error"]')
+    cy.get('[data-testid="name-error"]')
       .should('exist')
       .and('have.text', 'Name is required');
-          cy.get('[data-testid="password-error"]')
+    cy.get('[data-testid="password-error"]')
       .should('exist')
-      .and(
-        'have.text',
-        'Password is required',
-      );
+      .and('have.text', 'Password is required');
 
     cy.screenshot('signup-error-submit-invalid');
   });
@@ -142,7 +139,6 @@ describe('Form validation', () => {
 
     cy.get('[data-testid="signup-error"]').should('not.exist');
 
-    cy.screenshot('signup-after-submit');
-
+    // cy.screenshot('signup-after-submit');
   });
 });

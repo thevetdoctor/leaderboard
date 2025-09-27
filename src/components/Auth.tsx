@@ -183,7 +183,6 @@ const Auth = ({ connectionId }: AuthProps) => {
 
       setConfirmSuccess(true);
       setStep('popup');
-      setConfirmationCode('');
     } catch (err: any) {
       console.error(err.message);
       setConfirmLoading(false);
@@ -232,10 +231,6 @@ const Auth = ({ connectionId }: AuthProps) => {
         JSON.stringify(login.data.data.username),
       );
       setLoggedIn(true);
-      // const parsedData = JSON.parse(userData)
-      // console.log(parsedData);
-      // localStorage.setItem('user', JSON.stringify(parsedData));
-
       setStep('home');
       fetchScores(page);
     } catch (err: any) {
@@ -281,7 +276,6 @@ const Auth = ({ connectionId }: AuthProps) => {
           },
         },
       );
-      // setScore('');
       setStep('home');
       fetchScores(page);
     } catch (err: any) {
@@ -314,8 +308,6 @@ const Auth = ({ connectionId }: AuthProps) => {
       });
       setDeleteItem(undefined);
       setDeleteSuccess(true);
-      // setStep('home');
-      // fetchScores(page);
     } catch (err: any) {
       console.error(err.message);
       setDeleteLoading(false);
@@ -558,7 +550,7 @@ const Auth = ({ connectionId }: AuthProps) => {
 
       {step === 'confirm' && (
         <div>
-          <h2>Confirm Signup</h2>
+          <h2 data-testid="confirm-header">Confirm Signup</h2>
           <div className="form-group">
             <input
               placeholder="Confirmation Code"
@@ -663,8 +655,12 @@ const Auth = ({ connectionId }: AuthProps) => {
             </div>
           ) : (
             <>
-              <button onClick={handleLogin}>Login</button>
-              <button onClick={showSignup}>Signup</button>
+              <button data-testid="submit-login-button" onClick={handleLogin}>
+                Login
+              </button>
+              <button data-testid="submit-signup-button" onClick={showSignup}>
+                Sign Up
+              </button>
             </>
           )}
           <ErrorMessage id="login-error" message={errors.loginError} />
@@ -712,7 +708,6 @@ const Auth = ({ connectionId }: AuthProps) => {
               data-testid="submit-score-btn"
               className="submit"
               onClick={() => {
-                // setSubmitScore(true);
                 setStep('submit');
               }}
             >
