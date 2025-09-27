@@ -116,7 +116,7 @@ jobs:
         with:
           build: yarn cypress info
           start: yarn start:ci
-          wait-on: "http://localhost:3000"
+          wait-on: "http://localhost:5173"
           wait-on-timeout: 120
           browser: chrome
           record: true
