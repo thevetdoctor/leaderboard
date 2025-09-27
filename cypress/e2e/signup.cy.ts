@@ -3,22 +3,33 @@ describe('Form validation', () => {
     cy.visit('http://localhost:5173');
   });
 
-  it('should show an error message when email is invalid', () => {
-    cy.get('[data-testid="email-input"]').type('not-an-email');
-
+  it('should show an error message for invalid or missing input', () => {
+     cy.get('[data-testid="email-input"]').type(' ');
     cy.get('[data-testid="email-input"]').blur();
+    cy.get('[data-testid="email-error"]')
+      .should('exist')
+      .and('have.text', 'Email is required');
 
+    cy.screenshot('signup-error-email-required');
+
+    cy.get('[data-testid="email-input"]').type('not-an-email');
+    cy.get('[data-testid="email-input"]').blur();
     cy.get('[data-testid="email-error"]')
       .should('exist')
       .and('have.text', 'Enter a valid email');
 
+    cy.screenshot('signup-error-email-invalid');
+
+    
+    cy.get('[data-testid="username-input"]').type(' ');
+    cy.get('[data-testid="username-input"]').blur();
+    cy.get('[data-testid="username-error"]')
+    .should('exist')
+    .and('have.text', 'Username is required');
+    
+    cy.screenshot('signup-error-username-required');
+    
     // cy.get('[data-testid="submit-signup-button"]').click();
-
-    cy.get('[data-testid="email-error"]')
-      .should('exist')
-      .and('have.text', 'Enter a valid email');
-
-    cy.screenshot('signup-after-submit-error');
   });
 
   it('should not show an error if email is valid', () => {

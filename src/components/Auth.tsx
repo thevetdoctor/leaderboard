@@ -83,62 +83,76 @@ const Auth = ({ connectionId }: AuthProps) => {
 
   const validate = (type: string, field?: string) => {
     const newErrors: Record<string, string> = {};
+    console.log('before:', newErrors);
+    const isEmpty = (value?: string) => !value || !value.trim();
 
     // reset only the field being validated (so old error messages disappear if fixed)
     if (field) delete newErrors[field];
 
     if (type === 'login') {
-      if ((!field || field === 'username') && !username)
+      if ((!field || field === 'username') && isEmpty(username))
         newErrors.username = 'Username is required';
 
-      if ((!field || field === 'password') && !password) {
+      if ((!field || field === 'password') && isEmpty(password)) {
         newErrors.password = 'Password is required';
-      } else if (!passwordRegex.test(password)) {
+      } else if (
+        (!field || field === 'password') &&
+        !passwordRegex.test(password)
+      ) {
         newErrors.password =
           'Password must be at least 8 characters, include uppercase, lowercase, number, and special character';
       }
     }
 
     if (type === 'signup') {
-      if ((!field || field === 'email') && !email) {
+      if ((!field || field === 'email') && isEmpty(email)) {
         newErrors.email = 'Email is required';
-      } else if (!/\S+@\S+\.\S+/.test(email)) {
+      } else if ((!field || field === 'email') && !/\S+@\S+\.\S+/.test(email)) {
         newErrors.email = 'Enter a valid email';
       }
 
-      if ((!field || field === 'preferred_username') && !preferred_username)
+      if (
+        (!field || field === 'preferred_username') &&
+        isEmpty(preferred_username)
+      )
         newErrors.preferred_username = 'Preferred username is required';
 
-      if ((!field || field === 'name') && !name)
+      if ((!field || field === 'name') && isEmpty(name))
         newErrors.name = 'Name is required';
 
-      if ((!field || field === 'username') && !username)
+      if ((!field || field === 'username') && isEmpty(username))
         newErrors.username = 'Username is required';
 
-      if ((!field || field === 'password') && !password) {
+      if ((!field || field === 'password') && isEmpty(password)) {
         newErrors.password = 'Password is required';
-      } else if (!passwordRegex.test(password)) {
+      } else if (
+        (!field || field === 'password') &&
+        !passwordRegex.test(password)
+      ) {
         newErrors.password =
           'Password must be at least 8 characters, include uppercase, lowercase, number, and special character';
       }
     }
 
     if (type === 'confirm') {
-      if ((!field || field === 'confirmationCode') && !confirmationCode) {
+      if (
+        (!field || field === 'confirmationCode') &&
+        isEmpty(confirmationCode)
+      ) {
         newErrors.confirmationCode = 'Confirmation code is required';
       }
     }
 
     if (type === 'submit') {
-      if ((!field || field === 'score') && !score) {
+      if ((!field || field === 'score') && isEmpty(score)) {
         newErrors.score = 'Score is required';
-      } else if (!scoreRegex.test(score)) {
+      } else if ((!field || field === 'score') && !scoreRegex.test(score)) {
         newErrors.score = 'Score must be a positive integer';
       }
     }
 
     setErrors(newErrors);
-    console.log(newErrors);
+    console.log('after', newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
@@ -647,15 +661,22 @@ const Auth = ({ connectionId }: AuthProps) => {
               value={username}
               onChange={(e) => {
                 setUsername(e.target.value);
+                setTouched({ ...touched, username: true });
                 validate('login', 'username');
               }}
               onBlur={() => {
                 setTouched({ ...touched, username: true });
                 validate('login', 'username');
               }}
-              className={errors.username ? 'error-input' : ''}
+              className={
+                touched.username && errors.username ? 'error-input' : ''
+              }
             />
-            <ErrorMessage id="username-error" message={errors.username} />
+            <ErrorMessage
+              id="username-error"
+              touched={touched.username}
+              message={errors.username}
+            />
           </div>
           <div className="form-group">
             <input
@@ -665,15 +686,22 @@ const Auth = ({ connectionId }: AuthProps) => {
               value={password}
               onChange={(e) => {
                 setPassword(e.target.value);
+                setTouched({ ...touched, password: true });
                 validate('login', 'password');
               }}
               onBlur={() => {
                 setTouched({ ...touched, password: true });
                 validate('login', 'password');
               }}
-              className={errors.password ? 'error-input' : ''}
+              className={
+                touched.password && errors.password ? 'error-input' : ''
+              }
             />
-            <ErrorMessage id="password-error" message={errors.password} />
+            <ErrorMessage
+              id="password-error"
+              touched={touched.password}
+              message={errors.password}
+            />
           </div>
           {loginLoading ? (
             <div className="spinner">

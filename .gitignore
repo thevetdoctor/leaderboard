@@ -24,3 +24,9 @@ dist-ssr
 *.sw?
 
 .env
+
+# Cypress folders to ignore (cache, screenshots, videos, results)
+cypress/cache/
+cypress/screenshots/
+cypress/videos/
+cypress/results/

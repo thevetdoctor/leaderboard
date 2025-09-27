@@ -37,7 +37,6 @@ jobs:
 
       - name: Run Cypress tests
         run: |
-            echo "NODE_OPTIONS before: $NODE_OPTIONS"
-            unset NODE_OPTIONS
-            npx cypress run --browser chrome
-
+          echo "NODE_OPTIONS before: $NODE_OPTIONS"
+          unset NODE_OPTIONS
+          npx cypress run --browser chrome
