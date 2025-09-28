@@ -7,7 +7,7 @@ describe('Base test', () => {
       .should('contain', 'Signup');
     cy.get('[data-testid="email-input"]').should('exist');
     cy.get('[data-testid="username-input"]').should('exist');
-    cy.get('[data-testid="preferred-username-input"]').should('exist');
+    cy.get('[data-testid="preferred_username-input"]').should('exist');
     cy.get('[data-testid="name-input"]').should('exist');
     cy.get('[data-testid="password-input"]').should('exist');
     cy.get('[data-testid="submit-signup-button"]')

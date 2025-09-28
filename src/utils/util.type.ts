@@ -20,7 +20,7 @@ export type Values = {
   password: string;
   name: string;
   preferred_username: string;
-  confirmationCode?: string;
+  confirmationCode: string | undefined;
   score?: string;
   signupError?: string;
   loginError?: string;

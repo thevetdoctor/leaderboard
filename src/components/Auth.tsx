@@ -17,7 +17,10 @@ import {
 } from '../utils/util.type';
 import './Auth.css';
 import ErrorMessage from './Error';
+import FormInput from './FormInput';
+import Login from './Login';
 import './Popup.css';
+import Signup from './Signup';
 
 const Auth = ({ connectionId }: AuthProps) => {
   const [loggedIn, setLoggedIn] = useState(
@@ -98,60 +101,60 @@ const Auth = ({ connectionId }: AuthProps) => {
   const handleChange = (step: Step, field: keyof Values, value: string) => {
     setValues((prev) => ({ ...prev, [field]: value }));
     setTouched((prev) => ({ ...prev, [field]: true }));
-    console.log('handleChange', step, field, value);
     const newErrors = validate(
       step,
       { ...values, [field]: value },
       field,
       value,
     );
+    console.log('handleChange', step, field, value, newErrors);
     setErrors(newErrors);
   };
 
-  const handleSignup = async () => {
-    try {
-      setErrors({});
-      console.log('signing up');
-      const newErrors = validate('signup', values);
-      // mark all fields as touched
-      setTouched(
-        Object.keys(values).reduce((acc, key) => ({ ...acc, [key]: true }), {}),
-      );
-      if (Object.keys(newErrors).length > 0) {
-        setErrors(newErrors);
-        return;
-      }
-      setSignupLoading(true);
-      await axiosInstance.post(
-        `/auth/register`,
-        {
-          email,
-          username,
-          preferred_username,
-          name,
-          password,
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            connectionId: connectionId,
-          },
-        },
-      );
+  // const handleSignup = async () => {
+  //   try {
+  //     setErrors({});
+  //     console.log('signing up');
+  //     const newErrors = validate('signup', values);
+  //     // mark all fields as touched
+  //     setTouched(
+  //       Object.keys(values).reduce((acc, key) => ({ ...acc, [key]: true }), {}),
+  //     );
+  //     if (Object.keys(newErrors).length > 0) {
+  //       setErrors(newErrors);
+  //       return;
+  //     }
+  //     setSignupLoading(true);
+  //     await axiosInstance.post(
+  //       `/auth/register`,
+  //       {
+  //         email,
+  //         username,
+  //         preferred_username,
+  //         name,
+  //         password,
+  //       },
+  //       {
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //           connectionId: connectionId,
+  //         },
+  //       },
+  //     );
 
-      setSignupSuccess(true);
-      setStep('popup');
-    } catch (err: any) {
-      console.error(err.message);
-      setSignupLoading(false);
-      setErrors((prev) => ({
-        ...prev,
-        signupError: err.message,
-      }));
-    } finally {
-      setSignupLoading(false);
-    }
-  };
+  //     setSignupSuccess(true);
+  //     setStep('popup');
+  //   } catch (err: any) {
+  //     console.error(err.message);
+  //     setSignupLoading(false);
+  //     setErrors((prev) => ({
+  //       ...prev,
+  //       signupError: err.message,
+  //     }));
+  //   } finally {
+  //     setSignupLoading(false);
+  //   }
+  // };
 
   const handleConfirm = async () => {
     try {
@@ -195,55 +198,55 @@ const Auth = ({ connectionId }: AuthProps) => {
     }
   };
 
-  const handleLogin = async () => {
-    try {
-      setErrors({});
-      console.log('logging in');
-      const newErrors = validate('login', values);
-      // mark all fields as touched
-      setTouched(
-        Object.keys(values).reduce((acc, key) => ({ ...acc, [key]: true }), {}),
-      );
-      if (Object.keys(newErrors).length > 0) {
-        setErrors(newErrors);
-        return;
-      }
-      setLoginLoading(true);
-      const login: AxiosResponse<LoginResponse> = await axiosInstance.post(
-        `/auth/login`,
-        {
-          username,
-          password,
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            connectionId: connectionId,
-          },
-        },
-      );
-      const userData = decrypt(login.data.data.user);
-      console.log('encrypted', login.data.data.user && 'valid');
-      console.log('decrypted', userData && 'valid');
-      localStorage.setItem('user_id', JSON.stringify(login.data.data.user_id));
-      localStorage.setItem(
-        'username',
-        JSON.stringify(login.data.data.username),
-      );
-      setLoggedIn(true);
-      setStep('home');
-      fetchScores(page);
-    } catch (err: any) {
-      console.error(err.message);
-      setLoginLoading(false);
-      setErrors((prev) => ({
-        ...prev,
-        loginError: err.message,
-      }));
-    } finally {
-      setLoginLoading(false);
-    }
-  };
+  // const handleLogin = async () => {
+  //   try {
+  //     setErrors({});
+  //     console.log('logging in');
+  //     const newErrors = validate('login', values);
+  //     // mark all fields as touched
+  //     setTouched(
+  //       Object.keys(values).reduce((acc, key) => ({ ...acc, [key]: true }), {}),
+  //     );
+  //     if (Object.keys(newErrors).length > 0) {
+  //       setErrors(newErrors);
+  //       return;
+  //     }
+  //     setLoginLoading(true);
+  //     const login: AxiosResponse<LoginResponse> = await axiosInstance.post(
+  //       `/auth/login`,
+  //       {
+  //         username,
+  //         password,
+  //       },
+  //       {
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //           connectionId: connectionId,
+  //         },
+  //       },
+  //     );
+  //     const userData = decrypt(login.data.data.user);
+  //     console.log('encrypted', login.data.data.user && 'valid');
+  //     console.log('decrypted', userData && 'valid');
+  //     localStorage.setItem('user_id', JSON.stringify(login.data.data.user_id));
+  //     localStorage.setItem(
+  //       'username',
+  //       JSON.stringify(login.data.data.username),
+  //     );
+  //     setLoggedIn(true);
+  //     setStep('home');
+  //     fetchScores(page);
+  //   } catch (err: any) {
+  //     console.error(err.message);
+  //     setLoginLoading(false);
+  //     setErrors((prev) => ({
+  //       ...prev,
+  //       loginError: err.message,
+  //     }));
+  //   } finally {
+  //     setLoginLoading(false);
+  //   }
+  // };
 
   const handleSubmit = async () => {
     try {
@@ -410,125 +413,12 @@ const Auth = ({ connectionId }: AuthProps) => {
   return (
     <div>
       {step === 'signup' && (
-        <div>
-          <h2 data-testid="signup-header">Signup</h2>
-          <div className="form-group">
-            <input
-              data-testid="email-input"
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => handleChange('signup', 'email', e.target.value)}
-              onBlur={(e) => handleChange('signup', 'email', e.target.value)}
-              className={touched.email && errors.email ? 'error-input' : ''}
-            />
-            <ErrorMessage
-              id="email-error"
-              touched={touched.email}
-              message={errors.email}
-            />
-          </div>
-          <div className="form-group">
-            <input
-              data-testid="username-input"
-              type="text"
-              placeholder="Username"
-              value={username}
-              onChange={(e) =>
-                handleChange('signup', 'username', e.target.value)
-              }
-              onBlur={(e) => handleChange('signup', 'username', e.target.value)}
-              className={
-                touched.username && errors.username ? 'error-input' : ''
-              }
-            />
-            <ErrorMessage
-              id="username-error"
-              touched={touched.username}
-              message={errors.username}
-            />
-          </div>
-          <div className="form-group">
-            <input
-              data-testid="preferred-username-input"
-              type="text"
-              placeholder="Preferred Username"
-              value={preferred_username}
-              onChange={(e) =>
-                handleChange('signup', 'preferred_username', e.target.value)
-              }
-              onBlur={(e) =>
-                handleChange('signup', 'preferred_username', e.target.value)
-              }
-              className={
-                touched.preferred_username && errors.preferred_username
-                  ? 'error-input'
-                  : ''
-              }
-            />
-            <ErrorMessage
-              id="preferred-username-error"
-              touched={touched.preferred_username}
-              message={errors.preferred_username}
-            />
-          </div>
-          <div className="form-group">
-            <input
-              data-testid="name-input"
-              type="text"
-              placeholder="Name"
-              value={name}
-              onChange={(e) => handleChange('signup', 'name', e.target.value)}
-              onBlur={(e) => handleChange('signup', 'name', e.target.value)}
-              className={touched.name && errors.name ? 'error-input' : ''}
-            />
-            <ErrorMessage
-              id="name-error"
-              touched={touched.name}
-              message={errors.name}
-            />
-          </div>
-          <div className="form-group">
-            <input
-              data-testid="password-input"
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) =>
-                handleChange('signup', 'password', e.target.value)
-              }
-              onBlur={(e) => handleChange('signup', 'password', e.target.value)}
-              className={
-                touched.password && errors.password ? 'error-input' : ''
-              }
-            />
-            <ErrorMessage
-              id="password-error"
-              touched={touched.password}
-              message={errors.password}
-            />
-          </div>
-          <div>
-            {signupLoading ? (
-              <div className="spinner">
-                <div></div>
-              </div>
-            ) : (
-              <>
-                <button
-                  data-testid="submit-signup-button"
-                  onClick={handleSignup}
-                >
-                  Sign Up
-                </button>
-                <button data-testid="submit-login-button" onClick={showLogin}>
-                  Login
-                </button>
-              </>
-            )}
-          </div>
-          <ErrorMessage id="signup-error" message={errors.signupError} />
-        </div>
+        <Signup
+          onShowLogin={() => setStep('login')}
+          connectionId={connectionId}
+          onSetSignupSuccess={() => setSignupSuccess(true)}
+          onSetStep={() => setStep('popup')}
+        />
       )}
 
       {signupSuccess && (
@@ -551,28 +441,17 @@ const Auth = ({ connectionId }: AuthProps) => {
       {step === 'confirm' && (
         <div>
           <h2 data-testid="confirm-header">Confirm Signup</h2>
-          <div className="form-group">
-            <input
-              placeholder="Confirmation Code"
-              value={confirmationCode}
-              onChange={(e) =>
-                handleChange('confirm', 'confirmationCode', e.target.value)
-              }
-              onBlur={(e) =>
-                handleChange('confirm', 'confirmationCode', e.target.value)
-              }
-              className={
-                touched.confirmationCode && errors.confirmationCode
-                  ? 'error-input'
-                  : ''
-              }
-            />
-            <ErrorMessage
-              id="confirmation-code-error"
-              touched={touched.confirmationCode}
-              message={errors.confirmationCode}
-            />
-          </div>
+          <FormInput
+            name="confirmation-code"
+            type="text"
+            placeholder="Confirmation Code"
+            value={values.confirmationCode}
+            onChange={(e) =>
+              handleChange('confirm', 'confirmationCode', e.target.value)
+            }
+            errors={errors}
+            touched={touched}
+          />
           <div>
             {confirmLoading ? (
               <div className="spinner">
@@ -607,85 +486,27 @@ const Auth = ({ connectionId }: AuthProps) => {
       )}
 
       {step === 'login' && (
-        <div>
-          <h2 data-testid="login-header">Login</h2>
-          <div className="form-group">
-            <input
-              type="text"
-              data-testid="username-input"
-              placeholder="Username"
-              value={username}
-              onChange={(e) =>
-                handleChange('login', 'username', e.target.value)
-              }
-              onBlur={(e) => handleChange('login', 'username', e.target.value)}
-              className={
-                touched.username && errors.username ? 'error-input' : ''
-              }
-            />
-            <ErrorMessage
-              id="username-error"
-              touched={touched.username}
-              message={errors.username}
-            />
-          </div>
-          <div className="form-group">
-            <input
-              data-testid="password-input"
-              placeholder="Password"
-              type="password"
-              value={password}
-              onChange={(e) =>
-                handleChange('login', 'password', e.target.value)
-              }
-              onBlur={(e) => handleChange('login', 'password', e.target.value)}
-              className={
-                touched.password && errors.password ? 'error-input' : ''
-              }
-            />
-            <ErrorMessage
-              id="password-error"
-              touched={touched.password}
-              message={errors.password}
-            />
-          </div>
-          {loginLoading ? (
-            <div className="spinner">
-              <div></div>
-            </div>
-          ) : (
-            <>
-              <button data-testid="submit-login-button" onClick={handleLogin}>
-                Login
-              </button>
-              <button data-testid="submit-signup-button" onClick={showSignup}>
-                Sign Up
-              </button>
-            </>
-          )}
-          <ErrorMessage id="login-error" message={errors.loginError} />
-        </div>
+        <Login
+          onShowSignup={() => setStep('signup')}
+          connectionId={connectionId}
+          onSetLoggedIn={() => setLoggedIn(true)}
+          onSetStep={() => setStep('home')}
+          onFetchScores={() => fetchScores(page)}
+        />
       )}
 
       {step === 'submit' && (
         <div>
           <h2 data-testid="submit-header">Submit Score</h2>
-          <div className="form-group">
-            <input
-              type="text"
-              data-testid="score-input"
-              placeholder="Score"
-              value={score}
-              onChange={(e) => handleChange('submit', 'score', e.target.value)}
-              onBlur={(e) => handleChange('submit', 'score', e.target.value)}
-              className={touched.score && errors.score ? 'error-input' : ''}
-            />
-            <ErrorMessage
-              id="score-error"
-              touched={touched.score}
-              message={errors.score}
-            />
-          </div>
+          <FormInput
+            name="score"
+            type="score"
+            placeholder="Score"
+            value={values.score}
+            onChange={(e) => handleChange('submit', 'score', e.target.value)}
+            errors={errors}
+            touched={touched}
+          />
 
           {submitLoading ? (
             <div className="spinner">

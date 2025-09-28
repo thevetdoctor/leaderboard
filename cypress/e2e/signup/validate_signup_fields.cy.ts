@@ -1,6 +1,10 @@
 describe('Form validation', () => {
   beforeEach(() => {
     cy.visit('/');
+
+    // cy.get('input').each(($el) => {
+    //   cy.wrap($el).clear();
+    // });
   });
 
   it('should show an error message for missing email', () => {
@@ -12,7 +16,7 @@ describe('Form validation', () => {
 
     cy.screenshot('signup-error-email-required');
   });
-  it('should show error messages for all invalid email', () => {
+  it('should show error messages for invalid email', () => {
     cy.get('[data-testid="email-input"]').type('not-an-email');
     cy.get('[data-testid="email-input"]').blur();
     cy.get('[data-testid="email-error"]')
@@ -33,9 +37,9 @@ describe('Form validation', () => {
   });
 
   it('should show an error message for missing preferred username', () => {
-    cy.get('[data-testid="preferred-username-input"]').type(' ');
-    cy.get('[data-testid="preferred-username-input"]').blur();
-    cy.get('[data-testid="preferred-username-error"]')
+    cy.get('[data-testid="preferred_username-input"]').type(' ');
+    cy.get('[data-testid="preferred_username-input"]').blur();
+    cy.get('[data-testid="preferred_username-error"]')
       .should('exist')
       .and('have.text', 'Preferred username is required');
 
@@ -84,7 +88,7 @@ describe('Form validation', () => {
     cy.get('[data-testid="username-error"]')
       .should('exist')
       .and('have.text', 'Username is required');
-    cy.get('[data-testid="preferred-username-error"]')
+    cy.get('[data-testid="preferred_username-error"]')
       .should('exist')
       .and('have.text', 'Preferred username is required');
     cy.get('[data-testid="name-error"]')
@@ -113,11 +117,11 @@ describe('Form validation', () => {
     cy.get('[data-testid="username-error"]').should('not.exist');
 
     // Preferred Username
-    cy.get('[data-testid="preferred-username-input"]')
+    cy.get('[data-testid="preferred_username-input"]')
       .type('tester')
       .should('have.value', 'tester');
 
-    cy.get('[data-testid="preferred-username-error"]').should('not.exist');
+    cy.get('[data-testid="preferred_username-error"]').should('not.exist');
 
     // Name
     cy.get('[data-testid="name-input"]')
