@@ -3,7 +3,6 @@ describe('Form validation', () => {
     cy.visit('/');
 
     cy.get('[data-testid="submit-login-button"]').click();
-
   });
 
   it('should show an error message for missing username', () => {
